@@ -22,7 +22,7 @@
     methods: {
       async submitQuestion() {
         try {
-          const { data } = await axios.get("/api/gpt-response", {
+          const { data } = await axios.get("http://localhost:5000/api/gpt-response", {
             params: {
               prompt: this.question,
             },

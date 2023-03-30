@@ -1,3 +1,4 @@
+import os
 import openai
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -5,10 +6,10 @@ from flask_restful import Resource, Api
 
 app = Flask(__name__)
 api = Api(app)
-CORS(app)
+CORS(app, origins=["http://localhost:8080"])
 
 # api key
-openai.api_key = "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"
+openai.api_key = os.environ.get("OPENAI_API_KEY")
 
 
 class GPTResponse(Resource):
@@ -19,7 +20,7 @@ class GPTResponse(Resource):
             return jsonify({"error": "No prompt provided"})
 
         response = openai.Completion.create(
-            engine="davinci",
+            engine="gpt-3.5-turbo",
             prompt=user_question,
             temperature=0.9,
             max_tokens=150,
