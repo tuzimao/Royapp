@@ -8,7 +8,7 @@ api = Api(app)
 CORS(app)
 
 # api key
-openai.api_key = "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+openai.api_key = "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"
 
 
 class GPTResponse(Resource):
