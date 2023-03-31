@@ -19,16 +19,20 @@ class GPTResponse(Resource):
         if not user_question:
             return jsonify({"error": "No prompt provided"})
 
-        response = openai.Completion.create(
-            engine="gpt-3.5-turbo",
-            prompt=user_question,
-            temperature=0.9,
-            max_tokens=150,
-            top_p=1,
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are an Vancouver realestate advisor. You are helping a client find a home in Vancouver. What do you ask?"},
+                {"role": "user", "content": user_question},
+            ],
+            max_tokens=350,
             n=1,
             stop=None,
+            temperature=0.9,
         )
-        return jsonify(gpt_response=response.choices[0].text.strip())
+        response = response['choices'][0]['message']['content']
+
+        return jsonify(gpt_response=response.strip())
 
 
 api.add_resource(GPTResponse, '/api/gpt-response')
