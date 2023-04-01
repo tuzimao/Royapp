@@ -5,6 +5,7 @@ from flask_cors import CORS
 from flask_restful import Resource, Api
 
 app = Flask(__name__)
+app = Flask(__name__, static_folder='static', static_url_path='')
 api = Api(app)
 CORS(app, origins=["http://localhost:8080"])
 
@@ -36,6 +37,12 @@ class GPTResponse(Resource):
 
 
 api.add_resource(GPTResponse, '/api/gpt-response')
+
+
+@app.route('/')
+def index():
+    return app.send_static_file('index.html')
+
 
 if __name__ == '__main__':
     app.run(debug=True)

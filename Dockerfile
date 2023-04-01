@@ -39,7 +39,7 @@ RUN mkdir -p static
 RUN cp -r frontend/dist/* static/
 
 # 设置容器中的环境变量
-ENV FLASK_APP=main.py
+ENV FLASK_APP=app.py
 ENV FLASK_RUN_HOST=0.0.0.0
 
 # 暴露后端服务器端口
