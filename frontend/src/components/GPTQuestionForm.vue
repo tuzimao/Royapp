@@ -33,7 +33,7 @@ export default {
       .map((message, index) => `${index % 2 === 0 ? "User:" : "GPT:"} ${message.content}`)
       .join("\n") + `\nUser: ${this.question}`;
 
-    const { data } = await axios.get("http://localhost:5000/api/gpt-response", {
+    const { data } = await axios.get("/api/gpt-response", {
       params: {
         prompt: prompt,
       },
