@@ -1,6 +1,7 @@
 <template>
   <div class="gpt-chat">
     <h2>Chat with AI:</h2>
+    <SystemRoleSelector :disabled="disableRoleChange" @update-system-role="updateSystemRole" />
     <div class="chat-container">
       <div v-for="(message, index) in messages" :key="index" :class="`message ${message.type}`">
         {{ message.content }}
@@ -11,13 +12,28 @@
       <button type="submit">Submit</button>
       <button type="button" @click="resetChat" class="reset">Clear</button>
     </form>
+    <SystemRoleForm
+      v-if="showSystemRoleForm"
+      @submitRole="updateSystemRole"
+      @cancel="toggleSystemRoleForm"
+    />
   </div>
 </template>
 
+
 <script>
+import SystemRoleSelector from "./SystemRoleSelector.vue";
 import axios from "axios";
 
 export default {
+  computed: {
+    disableRoleChange() {
+      return this.messages.length > 0;
+    },
+  },
+  components: {
+    SystemRoleSelector,
+  },
   data() {
     return {
       question: "",
@@ -26,28 +42,33 @@ export default {
   },
   methods: {
     async submitQuestion() {
-      try {
-        this.messages.push({ type: "user", content: this.question });
+  try {
+    this.messages.push({ type: "user", content: this.question });
 
-        const prompt = this.messages
-          .map((message, index) => `${index % 2 === 0 ? "User:" : "GPT:"} ${message.content}`)
-          .join("\n") + `\nUser: ${this.question}`;
+    // 将之前的消息连接为一个字符串，作为新问题的上下文
+    const prompt = this.messages
+      .map((message, index) => `${index % 2 === 0 ? "User:" : "GPT:"} ${message.content}`)
+      .join("\n") + `\nUser: ${this.question}`;
 
-        const { data } = await axios.get("http://localhost:5000/api/gpt-response", {
-          params: {
-            prompt: prompt,
-          },
-        });
-        this.messages.push({ type: "gpt", content: data.gpt_response });
+    const { data } = await axios.get("http://localhost:5000/api/gpt-response", {
+      params: {
+        prompt: prompt,
+        systemRole: this.systemRole,
+      },
+    });
+    this.messages.push({ type: "gpt", content: data.gpt_response });
 
-        this.question = "";
-      } catch (error) {
-        console.error("Error fetching GPT response:", error);
-        this.messages.push({ type: "error", content: "An error occurred while fetching the response." });
-      }
-    },
+    this.question = "";
+  } catch (error) {
+    console.error("Error fetching GPT response:", error);
+    this.messages.push({ type: "error", content: "An error occurred while fetching the response." });
+  }
+},
     resetChat() {
       this.messages = [];
+    },
+    updateSystemRole(newRole) {
+      this.systemRole = newRole;
     },
   },
 };

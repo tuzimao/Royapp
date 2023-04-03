@@ -17,20 +17,23 @@ class GPTResponse(Resource):
     def get(self):
 
         user_question = request.args.get('prompt')
-        #user_question = "what is the meaning of buying a house?"
+        system_role = request.args.get('systemRole')
+
         if not user_question:
             return jsonify({"error": "No prompt provided"})
+        if not system_role:
+            system_role = "Vancouver realestate advisor"
 
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "You are an Vancouver realestate advisor. You are helping a client find a home in Vancouver. What do you ask?"},
+                {"role": "system", "content": f"You are a {system_role}. What do you ask?"},
                 {"role": "user", "content": user_question},
             ],
             max_tokens=350,
             n=1,
             stop=None,
-            temperature=0.9,
+            temperature=0.2,
         )
         response = response['choices'][0]['message']['content']
 
