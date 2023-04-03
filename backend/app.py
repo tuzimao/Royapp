@@ -17,6 +17,7 @@ class GPTResponse(Resource):
     def get(self):
 
         user_question = request.args.get('prompt')
+        #user_question = "what is the meaning of buying a house?"
         if not user_question:
             return jsonify({"error": "No prompt provided"})
 
