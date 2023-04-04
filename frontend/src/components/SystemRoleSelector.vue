@@ -1,18 +1,25 @@
 <template>
-    <div>
+  <div class="role-selection-wrapper">
+   <div>
       <button :disabled="disabled" @click="toggleRoleSelection">Add System Role</button>
       <div v-if="showRoleSelection" class="role-selection">
         <h5>Select a predefined role:</h5>
-        <select v-model="systemRole" @change="hideRoleSelector">
-          <option value="">--Select a role--</option>
-          <option value="Vancouver Real Estate Advisor">Vancouver Real Estate Advisor</option>
-          <option value="Doctor">Doctor</option>
-          <option value="Scientist">Scientist</option>
-        </select>
+        <div class="tag-container">
+          <div
+            v-for="role in predefinedRoles"
+            :key="role"
+            class="tag"
+            :class="{ selected: systemRole === role }"
+            @click="selectRole(role)"
+          >
+            {{ role }}
+          </div>
+        </div>
         <h5>Or enter a custom role:</h5>
         <input v-model="systemRole" @blur="hideRoleSelector" placeholder="Enter a custom role..." />
       </div>
     </div>
+   </div>
   </template>
   
   <script>
@@ -27,17 +34,27 @@
       return {
         systemRole: "Helpful Assistant",
         showRoleSelection: false,
+        predefinedRoles: [
+          "Vancouver Real Estate Advisor",
+          "Doctor",
+          "Scientist",
+        ],
       };
     },
     methods: {
-    toggleRoleSelection() {
-      this.showRoleSelection = !this.showRoleSelection;
+      toggleRoleSelection() {
+        this.showRoleSelection = !this.showRoleSelection;
+      },
+      hideRoleSelector() {
+        this.showRoleSelection = false;
+        this.$emit("update-system-role", this.systemRole);
+        this.$emit("role-selected");
+      },
+      selectRole(role) {
+        this.systemRole = role;
+        this.hideRoleSelector();
+      },
     },
-    hideRoleSelector() {
-      this.showRoleSelection = false;
-      this.$emit('role-selected');
-    },
-  },
     watch: {
       systemRole(newRole) {
         this.$emit("update-system-role", newRole);
@@ -46,11 +63,40 @@
   };
   </script>
   
+  
   <style scoped>
   .role-selection {
     display: flex;
     flex-direction: column;
     margin-bottom: 10px;
+    align-items: flex-start;
+  }
+  .role-selection-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-left: 0;
+  }
+  .tag-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .tag {
+    background-color: #3498db;
+    color: #ffffff;
+    padding: 4px 8px;
+    border-radius: 5px;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.3s;
+  }
+  .tag.selected {
+    background-color: #2980b9;
+  }
+  .tag:hover {
+    background-color: #2980b9;
   }
   </style>
   
