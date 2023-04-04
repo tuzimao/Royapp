@@ -1,7 +1,13 @@
 <template>
   <div class="gpt-chat">
     <h2>Chat with AI:</h2>
-    <SystemRoleSelector :disabled="disableRoleChange" @update-system-role="updateSystemRole" />
+    <SystemRoleSelector
+      v-if="showSystemRoleSelector"
+      :disabled="disableRoleChange"
+      @update-system-role="updateSystemRole"
+      @role-selected="onRoleSelected"
+    />
+    <h3 v-else>Current Role: {{ currentRole }}</h3>
     <div class="chat-container">
       <div v-for="(message, index) in messages" :key="index" :class="`message ${message.type}`">
         {{ message.content }}
@@ -38,10 +44,15 @@ export default {
     return {
       question: "",
       messages: [],
+      currentRole: "Helpful Assistant",
+      showSystemRoleSelector: true,
     };
   },
   methods: {
     async submitQuestion() {
+      if (this.showSystemRoleSelector) {
+        this.onRoleSelected();
+      }
   try {
     this.messages.push({ type: "user", content: this.question });
 
@@ -66,9 +77,14 @@ export default {
 },
     resetChat() {
       this.messages = [];
+      this.showSystemRoleSelector = true;
     },
     updateSystemRole(newRole) {
       this.systemRole = newRole;
+      this.currentRole = newRole;
+    },
+    onRoleSelected() {
+      this.showSystemRoleSelector = false;
     },
   },
 };
