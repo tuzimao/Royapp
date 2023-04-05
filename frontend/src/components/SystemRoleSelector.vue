@@ -16,7 +16,7 @@
           </div>
         </div>
         <h5>Or enter a custom role:</h5>
-        <input v-model="systemRole" @blur="hideRoleSelector" placeholder="Enter a custom role..." />
+        <input v-model="systemRole" @change="hideRoleSelector" placeholder="Enter a custom role..." />
       </div>
     </div>
    </div>
@@ -51,6 +51,7 @@
         this.$emit("role-selected");
       },
       selectRole(role) {
+        console.log("Role selected:", role);
         this.systemRole = role;
         this.hideRoleSelector();
       },
