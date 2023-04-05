@@ -8,27 +8,35 @@
       @role-selected="onRoleSelected"
     />
     <h3 v-else>Current Role: {{ currentRole }}</h3>
-    <div class="chat-container p-3 bg-light mb-3 overflow-auto">
+    <div class="chat-container p-3 mb-3 overflow-auto">
       <div
         v-for="(message, index) in messages"
         :key="index"
-        :class="`message ${message.type} p-2 mb-2 rounded text-white`"
+        :class="`message ${message.type} p-2 mb-2 rounded text-black`"
       >
         {{ message.content }}
       </div>
     </div>
     <form @submit.prevent="submitQuestion" class="input-form d-flex mb-3">
-      <input
+      <textarea
         v-model="question"
         class="form-control me-2"
         placeholder="Type your question here..."
         required
-      />
-      <button type="submit" class="btn btn-primary">Submit</button>
-      <button type="button" @click="resetChat" class="btn btn-secondary ms-2">
-        Clear
-      </button>
+        rows="1"
+        style="resize: none;"
+        @input="autoResizeTextArea"
+        @keydown.enter.prevent="submitQuestion"
+    
+      ></textarea>
+      <div class="button-container">
+        <button type="submit" class="btn btn-primary">Submit</button>
+        <button type="button" @click="resetChat" class="btn btn-secondary ms-2">
+          Clear
+        </button>
+      </div>
     </form>
+
   </div>
 </template>
 
@@ -57,17 +65,20 @@ export default {
   },
   methods: {
     async submitQuestion() {
-      if (this.showSystemRoleSelector) {
-        this.onRoleSelected();
-      }
+  if (this.question.trim() === "") {
+    return;
+  }
+
+  if (this.showSystemRoleSelector) {
+    this.onRoleSelected();
+  }
   try {
     this.messages.push({ type: "user", content: this.question });
 
-    // 将之前的消息连接为一个字符串，作为新问题的上下文
     const prompt = this.messages
       .map((message, index) => `${index % 2 === 0 ? "User:" : "GPT:"} ${message.content}`)
       .join("\n") + `\nUser: ${this.question}`;
-
+      this.question = "";
     const { data } = await axios.get("http://localhost:5000/api/gpt-response", {
       params: {
         prompt: prompt,
@@ -92,6 +103,11 @@ export default {
     onRoleSelected() {
       this.showSystemRoleSelector = false;
     },
+    autoResizeTextArea(event) {
+    event.target.style.height = "10px";
+    event.target.style.height = event.target.scrollHeight + "px";
+    },
+    
   },
 };
 </script>
@@ -99,6 +115,11 @@ export default {
 
 
 <style scoped>
+.button-container {
+  height: 38px;
+  display: flex;
+  justify-content: flex-start;
+}
 .chat-container {
   width: 100%;
   height: 400px;
@@ -106,12 +127,12 @@ export default {
 }
 
 .user {
-  background-color: #0d6efd;
+  background-color: #f8f9fa;
   align-self: flex-end;
 }
 
 .gpt {
-  background-color: #198754;
+  
   align-self: flex-start;
 }
 
