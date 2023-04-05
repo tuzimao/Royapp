@@ -16,7 +16,10 @@
           </div>
         </div>
         <h5>Or enter a custom role:</h5>
-        <input v-model="systemRole" @change="hideRoleSelector" placeholder="Enter a custom role..." />
+        <div class="set-container">
+          <input v-model="systemRole" @change="hideRoleSelector" placeholder="Enter a custom role..." />
+          <button @click="setSystemRole" class="btn btn-primary">Set</button>
+        </div>
       </div>
     </div>
    </div>
@@ -55,6 +58,9 @@
         this.systemRole = role;
         this.hideRoleSelector();
       },
+      setSystemRole() {
+        this.hideRoleSelector();
+      },
     },
     watch: {
       systemRole(newRole) {
@@ -70,6 +76,7 @@
     display: flex;
     flex-direction: column;
     margin-bottom: 10px;
+    margin-top: 20px;
     align-items: flex-start;
   }
   .role-selection-wrapper {
@@ -99,5 +106,22 @@
   .tag:hover {
     background-color: #2980b9;
   }
+  .set-container {
+    display: flex-start;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .set-container input {
+    height: 38px;
+  }
+
+  .set-container .btn {
+    font-size: 14px;
+    line-height: 20px;
+    padding: 6px 12px;
+    margin-left: 8px;
+  }
+  
   </style>
   
