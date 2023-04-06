@@ -1,9 +1,15 @@
 <template>
   <div class="role-selection-wrapper">
    <div>
-      <button :disabled="disabled" @click="toggleRoleSelection">Add System Role</button>
+    <button
+        :disabled="disabled"
+        @click="toggleRoleSelection"
+        class="role-toggle-btn"
+      >
+      {{ showRoleSelection ? "- Back" : "+ System Role" }}
+    </button>
       <div v-if="showRoleSelection" class="role-selection">
-        <h5>Select a predefined role:</h5>
+        <span class="predefine-role-text">Select a predefined role:</span>
         <div class="tag-container">
           <div
             v-for="role in predefinedRoles"
@@ -15,10 +21,10 @@
             {{ role }}
           </div>
         </div>
-        <h5>Or enter a custom role:</h5>
+        <span class="predefine-role-text">Or enter a custom role:</span>
         <div class="set-container">
-          <input v-model="systemRole" @change="hideRoleSelector" placeholder="Enter a custom role..." />
-          <button @click="setSystemRole" class="btn btn-primary">Set</button>
+          <input v-model="systemRole" @change="hideRoleSelector" class="custom-role-input" placeholder="Enter a custom role..." />
+          <button @click="setSystemRole" class="set-container-btn">Set</button>
         </div>
       </div>
     </div>
@@ -41,6 +47,7 @@
           "Vancouver Real Estate Advisor",
           "Doctor",
           "Scientist",
+          "My Angry Girlfriend!",
         ],
       };
     },
@@ -72,6 +79,17 @@
   
   
   <style scoped>
+
+.role-toggle-btn {
+    background-color: transparent;
+    color: #3498db;
+    border: none;
+    cursor: pointer;
+    outline: none;
+  }
+  .predefine-role-text {
+    margin-bottom: 10px;
+  }
   .role-selection {
     display: flex;
     flex-direction: column;
@@ -109,18 +127,34 @@
   .set-container {
     display: flex-start;
     gap: 8px;
+    text-align: center;
     align-items: center;
   }
 
   .set-container input {
-    height: 38px;
+    height: 32px;
   }
 
-  .set-container .btn {
-    font-size: 14px;
-    line-height: 20px;
-    padding: 6px 12px;
+  .set-container-btn {
     margin-left: 8px;
+    color: #3498db;
+    background-color: #ffffff;
+    padding: 4px 8px;
+    border-radius: 5px;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.3s;
+    border: none;
+  }
+  .set-container-btn:hover {
+    color: #2980b9;
+  }
+  .custom-role-input {
+    text-align: center;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    outline: none;
   }
   
   </style>
