@@ -40,6 +40,34 @@ class GPTResponse(Resource):
         return jsonify(gpt_response=response.strip())
 
 
+class GPTRegenerateResponse(Resource):
+    def get(self):
+
+        user_question = request.args.get('prompt')
+        system_role = request.args.get('systemRole')
+
+        if not user_question:
+            return jsonify({"error": "No prompt provided"})
+        if not system_role:
+            system_role = "Vancouver realestate advisor"
+
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": f"You are a {system_role}. What do you ask?"},
+                {"role": "user", "content": user_question},
+            ],
+            max_tokens=350,
+            n=1,
+            stop=None,
+            temperature=0.9,  # 使用稍微更高的 temperature 值以获得不同的回答
+        )
+        response = response['choices'][0]['message']['content']
+
+        return jsonify(gpt_response=response.strip())
+
+
+api.add_resource(GPTRegenerateResponse, '/api/regenerate-gpt-response')
 api.add_resource(GPTResponse, '/api/gpt-response')
 
 
