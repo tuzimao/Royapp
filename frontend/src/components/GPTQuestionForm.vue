@@ -7,6 +7,11 @@
       @update-system-role="updateSystemRole"
       @role-selected="onRoleSelected"
     />
+    <AdvanceOptions
+      v-if="showSystemRoleSelector"
+      :disabled="disableRoleChange"
+
+    />
     <h3 v-else>Current Role: {{ currentRole }}</h3>
     <div class="chat-container p-3 mb-3 overflow-auto" ref="chatContainer">
       <div
@@ -30,6 +35,7 @@
       <div class="message-content-container">
         <div class="message-content">
           {{ message.content }}
+          
         </div>
         <div
           v-if="message.type === 'gpt' && !isWaitingForResponse && index === messages.length - 1 && message.type !== 'summary'"
@@ -87,6 +93,7 @@
 
 <script>
 import SystemRoleSelector from "./SystemRoleSelector.vue";
+import AdvanceOptions from "./AdvanceOptions.vue";
 import axios from "axios";
 
 export default {
@@ -97,7 +104,8 @@ export default {
   },
   components: {
     SystemRoleSelector,
-  },
+    AdvanceOptions,
+},
   data() {
     return {
       isWaitingForResponse: false,
@@ -109,6 +117,17 @@ export default {
     };
   },
   methods: {
+    async displayResponse(responseText, index) {
+      let displayText = "";
+      const delay = 50; // You can adjust the delay between characters here (in milliseconds)
+
+      for (let char of responseText) {
+        displayText += char;
+        this.messages[index].content = displayText;
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        this.scrollToBottom();
+      }
+    },
     updateSystemRole(newRole) {
       this.currentRole = newRole;
     },
@@ -142,7 +161,9 @@ export default {
           },
           cancelToken: this.cancelSource.token,
         });
-        this.messages.push({ type: "gpt", content: data.gpt_response });
+        const index = this.messages.length;
+        this.messages.push({ type: "gpt", content: "" });
+        await this.displayResponse(data.gpt_response, index);
       } catch (error) {
         if (!axios.isCancel(error)) {
           console.error("Failed to get response from GPT:", error);
