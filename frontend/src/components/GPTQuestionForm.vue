@@ -8,7 +8,7 @@
       @role-selected="onRoleSelected"
     />
     <h3 v-else>Current Role: {{ currentRole }}</h3>
-    <div class="chat-container p-3 mb-3 overflow-auto">
+    <div class="chat-container p-3 mb-3 overflow-auto" ref="chatContainer">
       <div
         v-for="(message, index) in messages"
         :key="index"
@@ -32,10 +32,9 @@
           {{ message.content }}
         </div>
         <div
-          v-if="message.type === 'gpt' && !isWaitingForResponse && index === messages.length - 1"
+          v-if="message.type === 'gpt' && !isWaitingForResponse && index === messages.length - 1 && message.type !== 'summary'"
           class="regenerate-button-container"
         >
-          
           <button
             @click="regenerateResponse(index)"
           >
@@ -43,6 +42,18 @@
           <span>Regenerate</span>
           </button>
         </div>
+        <div
+          v-if="message.type === 'gpt' && !isWaitingForResponse && index === messages.length - 1 && message.type !== 'summary'"
+          class="summarize-button-container"
+        >
+
+          <button
+            @click="generateSummary"
+          >
+            <span>Summarize</span>
+          </button>
+        </div>
+
     </div>  
   </div>
 </div>
@@ -114,6 +125,7 @@ export default {
       }
 
       this.messages.push({ type: "user", content: this.question });
+      this.scrollToBottom();
 
       try {
         this.isWaitingForResponse = true;
@@ -140,6 +152,7 @@ export default {
         this.isWaitingForResponse = false;
         this.cancelSource = null;
         this.question = "";
+        this.scrollToBottom(); 
       }
     },
     autoResizeTextArea(event) {
@@ -156,6 +169,11 @@ export default {
       }
       this.isWaitingForResponse = false;
       this.question = "";
+    },
+    scrollToBottom() {
+      this.$nextTick(() => {
+        this.$refs.chatContainer.scrollTop = this.$refs.chatContainer.scrollHeight;
+      });
     },
     async regenerateResponse(index) {
       if (index === this.messages.length - 1) {
@@ -176,6 +194,7 @@ export default {
             cancelToken: this.cancelSource.token,
           });
           this.messages.splice(index, 1, { type: "gpt", content: data.gpt_response });
+           this.scrollToBottom();
         } catch (error) {
           if (!axios.isCancel(error)) {
             console.error("Failed to regenerate response from GPT:", error);
@@ -184,9 +203,39 @@ export default {
         } finally {
           this.isWaitingForResponse = false;
           this.cancelSource = null;
+          this.scrollToBottom(); 
         }
       }
     },
+    async generateSummary() {
+      try {
+        this.isWaitingForResponse = true;
+        this.cancelSource = axios.CancelToken.source();
+
+        const prompt = `summarize the dialogue:\n${this.messages
+          .map((message, index) => `${index % 2 === 0 ? "User:" : "GPT:"} ${message.content}`)
+          .join("\n")}`;
+
+        const { data } = await axios.get("http://localhost:5000/api/gpt-response", {
+          params: {
+            prompt: prompt,
+            systemRole: this.currentRole,
+          },
+          cancelToken: this.cancelSource.token,
+        });
+        this.messages.push({ type: "summary", content: data.gpt_response });
+      } catch (error) {
+        if (!axios.isCancel(error)) {
+          console.error("Failed to generate summary from GPT:", error);
+          this.messages.push({ type: "gpt", content: "Error: Failed to generate summary from GPT." });
+        }
+      } finally {
+        this.isWaitingForResponse = false;
+        this.cancelSource = null;
+        this.scrollToBottom(); 
+      }
+    },
+
 
 
 
@@ -220,14 +269,19 @@ export default {
   text-align: right;
   margin-top: 8px;
 }
-
+.summarize-button-container{
+  text-align: right;
+  margin-top: 8px;
+}
 
 .message {
   word-wrap: break-word;
   display: flex;
   align-items: flex-start;
 }
-
+.summary {
+  background-color: #f8e9a1;
+}
 .message.user {
   background-color: #e0f3ff;
 }
